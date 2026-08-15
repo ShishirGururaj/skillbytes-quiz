@@ -24,5 +24,31 @@ def create_indexes() -> None:
     db.chapters.create_index([("subject_id", ASCENDING)])
 
     db.questions.create_index([("question_id", ASCENDING)], unique=True)
-    db.questions.create_index([("exam_id", ASCENDING), ("subject_id", ASCENDING)])
+    db.questions.create_index(
+        [
+            ("exam_id", ASCENDING),
+            ("subject_id", ASCENDING),
+        ]
+    )
     db.questions.create_index([("chapter_id", ASCENDING)])
+
+    db.attempts.create_index(
+        [
+            ("user_id", ASCENDING),
+            ("quiz_id", ASCENDING),
+        ]
+    )
+
+    db.attempts.create_index(
+        [
+            ("question_id", ASCENDING),
+        ]
+    )
+
+    db.attempts.create_index(
+        [
+            ("exam_id", ASCENDING),
+            ("subject_id", ASCENDING),
+            ("chapter_id", ASCENDING),
+        ]
+    )

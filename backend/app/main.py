@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes.catalog import router as catalog_router
 from app.routes.quiz import router as quiz_router
+from app.routes.analytics import router as analytics_router
 
 app = FastAPI(
     title="SkillBytes Quiz API",
@@ -22,6 +23,7 @@ app.add_middleware(
 
 app.include_router(catalog_router)
 app.include_router(quiz_router)
+app.include_router(analytics_router)
 
 @app.get("/health")
 async def health() -> dict[str, str]:

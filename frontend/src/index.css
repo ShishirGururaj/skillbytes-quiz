@@ -1,0 +1,135 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  background: #f4f6f8;
+  color: #17202a;
+}
+
+button,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.container {
+  width: min(720px, 100%);
+  margin: 0 auto;
+}
+
+header {
+  margin-bottom: 24px;
+}
+
+h1 {
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  margin-top: 0;
+  color: #68737d;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+select {
+  width: 100%;
+  padding: 12px;
+  margin: 16px 0;
+  border: 1px solid #ccd3d9;
+  border-radius: 8px;
+}
+
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  background: #17202a;
+  color: white;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.selection-list,
+.options {
+  display: grid;
+  gap: 12px;
+}
+
+.selection,
+.option {
+  width: 100%;
+  text-align: left;
+}
+
+.option {
+  background: #eef1f4;
+  color: #17202a;
+}
+
+.option.selected {
+  outline: 2px solid #17202a;
+  background: #dce2e7;
+}
+
+.progress {
+  margin-bottom: 20px;
+  color: #68737d;
+  font-size: 14px;
+}
+
+.options {
+  margin: 24px 0;
+}
+
+.error {
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #ffe5e5;
+  color: #8a1c1c;
+}
+
+.loading {
+  margin-bottom: 16px;
+  color: #68737d;
+}
+
+.result {
+  text-align: center;
+}
+
+.score {
+  font-size: 64px;
+  font-weight: 700;
+  margin: 20px 0;
+}

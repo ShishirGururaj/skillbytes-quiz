@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 const API_URL = "http://127.0.0.1:8000";
 
@@ -43,13 +43,38 @@ type Result = {
   score_percentage: number;
 };
 
+type LearningVelocity = {
+  user_id: string;
+  accuracy: number;
+  avg_response_time: number;
+  consistency_score: number;
+  learning_velocity_index: number;
+};
+
+type FatigueWindow = {
+  window_start: number;
+  window_end: number;
+  accuracy: number;
+  avg_response_time: number;
+  attempts: number;
+};
+
+type QuestionDifficulty = {
+  question_id: string;
+  total_attempts: number;
+  accuracy_percentage: number;
+  avg_response_time: number;
+  difficulty_score: number;
+};
+
 type Screen =
   | "login"
   | "exams"
   | "subjects"
   | "chapters"
   | "quiz"
-  | "result";
+  | "result"
+  | "analytics";
 
 function App() {
   const [screen, setScreen] = useState<Screen>("login");
@@ -62,20 +87,30 @@ function App() {
   const [selectedExam, setSelectedExam] = useState<Exam | null>(null);
   const [selectedSubject, setSelectedSubject] =
     useState<Subject | null>(null);
-  const [selectedChapter, setSelectedChapter] =
-    useState<Chapter | null>(null);
 
   const [quiz, setQuiz] = useState<QuizResponse | null>(null);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [questionShownAt, setQuestionShownAt] =
-    useState<string>("");
+  const [questionShownAt, setQuestionShownAt] = useState("");
 
   const [result, setResult] = useState<Result | null>(null);
+
+  const [learningVelocity, setLearningVelocity] =
+    useState<LearningVelocity[]>([]);
+  const [fatigue, setFatigue] = useState<FatigueWindow[]>([]);
+  const [difficulty, setDifficulty] =
+    useState<QuestionDifficulty[]>([]);
+
+  const [analyticsUser, setAnalyticsUser] = useState("user_001");
+  const [analyticsQuiz, setAnalyticsQuiz] = useState("chapter_001");
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function api<T>(path: string, options?: RequestInit): Promise<T> {
+  async function api<T>(
+    path: string,
+    options?: RequestInit,
+  ): Promise<T> {
     const response = await fetch(`${API_URL}${path}`, {
       headers: {
         "Content-Type": "application/json",
@@ -100,7 +135,9 @@ function App() {
       setExams(data);
       setScreen("exams");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load exams");
+      setError(
+        err instanceof Error ? err.message : "Unable to load exams",
+      );
     } finally {
       setLoading(false);
     }
@@ -119,7 +156,11 @@ function App() {
       setSubjects(data);
       setScreen("subjects");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load subjects");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load subjects",
+      );
     } finally {
       setLoading(false);
     }
@@ -138,7 +179,11 @@ function App() {
       setChapters(data);
       setScreen("chapters");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load chapters");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load chapters",
+      );
     } finally {
       setLoading(false);
     }
@@ -153,14 +198,17 @@ function App() {
         `/api/quiz/${chapter.chapter_id}?user_id=${userId}`,
       );
 
-      setSelectedChapter(chapter);
       setQuiz(data);
       setQuestionIndex(0);
       setSelectedOption(null);
       setQuestionShownAt(new Date().toISOString());
       setScreen("quiz");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to load quiz");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load quiz",
+      );
     } finally {
       setLoading(false);
     }
@@ -204,7 +252,62 @@ function App() {
         setQuestionShownAt(new Date().toISOString());
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to submit answer");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to submit answer",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadAnalytics() {
+    setError("");
+    setLoading(true);
+
+    try {
+      const [velocity, difficultyData] = await Promise.all([
+        api<LearningVelocity[]>(
+          "/api/analytics/learning-velocity",
+        ),
+        api<QuestionDifficulty[]>(
+          "/api/analytics/question-difficulty",
+        ),
+      ]);
+
+      setLearningVelocity(velocity);
+      setDifficulty(difficultyData);
+      setFatigue([]);
+
+      setScreen("analytics");
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load analytics",
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadFatigue() {
+    setError("");
+    setLoading(true);
+
+    try {
+      const data = await api<FatigueWindow[]>(
+        `/api/analytics/fatigue/${analyticsUser}/${analyticsQuiz}`,
+      );
+
+      setFatigue(data);
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Unable to load fatigue analysis",
+      );
     } finally {
       setLoading(false);
     }
@@ -213,7 +316,6 @@ function App() {
   function restart() {
     setSelectedExam(null);
     setSelectedSubject(null);
-    setSelectedChapter(null);
     setQuiz(null);
     setResult(null);
     setQuestionIndex(0);
@@ -228,7 +330,9 @@ function App() {
       <div className="container">
         <header>
           <h1>SkillBytes Quiz</h1>
-          <p className="subtitle">AI-powered learning assessment</p>
+          <p className="subtitle">
+            AI-powered learning assessment
+          </p>
         </header>
 
         {error && <div className="error">{error}</div>}
@@ -260,12 +364,21 @@ function App() {
         )}
 
         {screen === "exams" && (
-          <Selection
-            title="Choose an Exam"
-            items={exams}
-            label={(exam) => exam.name}
-            onSelect={selectExam}
-          />
+          <>
+            <Selection
+              title="Choose an Exam"
+              items={exams}
+              label={(exam) => exam.name}
+              onSelect={selectExam}
+            />
+
+            <button
+              className="analytics-button"
+              onClick={loadAnalytics}
+            >
+              View Analytics
+            </button>
+          </>
         )}
 
         {screen === "subjects" && (
@@ -289,7 +402,8 @@ function App() {
         {screen === "quiz" && currentQuestion && (
           <section className="card">
             <div className="progress">
-              Question {questionIndex + 1} of {quiz?.questions.length}
+              Question {questionIndex + 1} of{" "}
+              {quiz?.questions.length}
             </div>
 
             <h2>{currentQuestion.text}</h2>
@@ -299,7 +413,9 @@ function App() {
                 <button
                   key={option}
                   className={
-                    selectedOption === index ? "option selected" : "option"
+                    selectedOption === index
+                      ? "option selected"
+                      : "option"
                   }
                   onClick={() => setSelectedOption(index)}
                 >
@@ -312,7 +428,8 @@ function App() {
               disabled={selectedOption === null || loading}
               onClick={submitAnswer}
             >
-              {questionIndex === (quiz?.questions.length ?? 1) - 1
+              {questionIndex ===
+              (quiz?.questions.length ?? 1) - 1
                 ? "Finish Quiz"
                 : "Next"}
             </button>
@@ -332,7 +449,199 @@ function App() {
               {result.total_questions} questions correctly.
             </p>
 
-            <button onClick={restart}>Take Another Quiz</button>
+            <div className="result-actions">
+              <button onClick={restart}>
+                Take Another Quiz
+              </button>
+
+              <button
+                className="secondary-button"
+                onClick={loadAnalytics}
+              >
+                View Analytics
+              </button>
+            </div>
+          </section>
+        )}
+
+        {screen === "analytics" && (
+          <section className="analytics">
+            <div className="analytics-header">
+              <div>
+                <h2>Learning Analytics</h2>
+                <p>
+                  Insights derived from question attempt events.
+                </p>
+              </div>
+
+              <button
+                className="secondary-button"
+                onClick={() => setScreen("exams")}
+              >
+                Back to Exams
+              </button>
+            </div>
+
+            <div className="analytics-card">
+              <h3>Learning Velocity Index</h3>
+
+              {learningVelocity.length === 0 ? (
+                <p className="empty">
+                  No attempt data available yet.
+                </p>
+              ) : (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Rank</th>
+                        <th>User</th>
+                        <th>Accuracy</th>
+                        <th>Avg. Response</th>
+                        <th>Consistency</th>
+                        <th>Velocity</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {learningVelocity.map((user, index) => (
+                        <tr key={user.user_id}>
+                          <td>{index + 1}</td>
+                          <td>{user.user_id}</td>
+                          <td>{user.accuracy}%</td>
+                          <td>{user.avg_response_time}s</td>
+                          <td>{user.consistency_score}</td>
+                          <td>
+                            <strong>
+                              {user.learning_velocity_index}
+                            </strong>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div className="analytics-card">
+              <h3>Fatigue Analysis</h3>
+
+              <div className="analytics-controls">
+                <select
+                  value={analyticsUser}
+                  onChange={(event) =>
+                    setAnalyticsUser(event.target.value)
+                  }
+                >
+                  {learningVelocity.map((user) => (
+                    <option
+                      key={user.user_id}
+                      value={user.user_id}
+                    >
+                      {user.user_id}
+                    </option>
+                  ))}
+                </select>
+
+                <input
+                  value={analyticsQuiz}
+                  onChange={(event) =>
+                    setAnalyticsQuiz(event.target.value)
+                  }
+                  placeholder="Quiz ID"
+                />
+
+                <button onClick={loadFatigue}>
+                  Analyze
+                </button>
+              </div>
+
+              {fatigue.length > 0 ? (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Questions</th>
+                        <th>Accuracy</th>
+                        <th>Avg. Response</th>
+                        <th>Attempts</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {fatigue.map((window) => (
+                        <tr
+                          key={`${window.window_start}-${window.window_end}`}
+                        >
+                          <td>
+                            {window.window_start}–
+                            {window.window_end}
+                          </td>
+                          <td>{window.accuracy}%</td>
+                          <td>
+                            {window.avg_response_time}s
+                          </td>
+                          <td>{window.attempts}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="empty">
+                  Enter a quiz ID and click Analyze.
+                </p>
+              )}
+            </div>
+
+            <div className="analytics-card">
+              <h3>Question Difficulty</h3>
+
+              {difficulty.length === 0 ? (
+                <p className="empty">
+                  No question attempt data available.
+                </p>
+              ) : (
+                <div className="table-wrapper">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Rank</th>
+                        <th>Question</th>
+                        <th>Attempts</th>
+                        <th>Accuracy</th>
+                        <th>Avg. Response</th>
+                        <th>Difficulty</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {difficulty.slice(0, 10).map(
+                        (question, index) => (
+                          <tr key={question.question_id}>
+                            <td>{index + 1}</td>
+                            <td>{question.question_id}</td>
+                            <td>{question.total_attempts}</td>
+                            <td>
+                              {question.accuracy_percentage}%
+                            </td>
+                            <td>
+                              {question.avg_response_time}s
+                            </td>
+                            <td>
+                              <strong>
+                                {question.difficulty_score}
+                              </strong>
+                            </td>
+                          </tr>
+                        ),
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </section>
         )}
       </div>

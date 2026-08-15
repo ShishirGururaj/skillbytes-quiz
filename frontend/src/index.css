@@ -16,12 +16,18 @@ body {
 }
 
 button,
-select {
+select,
+input {
   font: inherit;
 }
 
 button {
   cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .app {
@@ -30,7 +36,7 @@ button {
 }
 
 .container {
-  width: min(720px, 100%);
+  width: min(1000px, 100%);
   margin: 0 auto;
 }
 
@@ -47,7 +53,8 @@ h1 {
   color: #68737d;
 }
 
-.card {
+.card,
+.analytics-card {
   background: white;
   border-radius: 12px;
   padding: 28px;
@@ -58,12 +65,14 @@ h1 {
   margin-top: 0;
 }
 
-select {
+select,
+input {
   width: 100%;
   padding: 12px;
   margin: 16px 0;
   border: 1px solid #ccd3d9;
   border-radius: 8px;
+  background: white;
 }
 
 button {
@@ -72,11 +81,6 @@ button {
   padding: 12px 18px;
   background: #17202a;
   color: white;
-}
-
-button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .selection-list,
@@ -132,4 +136,108 @@ button:disabled {
   font-size: 64px;
   font-weight: 700;
   margin: 20px 0;
+}
+
+.result-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.secondary-button {
+  background: #68737d;
+}
+
+.analytics-button {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.analytics {
+  display: grid;
+  gap: 20px;
+}
+
+.analytics-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.analytics-header h2 {
+  margin-bottom: 4px;
+}
+
+.analytics-header p {
+  margin-top: 0;
+  color: #68737d;
+}
+
+.analytics-card h3 {
+  margin-top: 0;
+}
+
+.analytics-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.analytics-controls select,
+.analytics-controls input {
+  margin: 0;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #e5e8eb;
+  white-space: nowrap;
+}
+
+th {
+  font-size: 13px;
+  color: #68737d;
+}
+
+.empty {
+  color: #68737d;
+}
+
+@media (max-width: 700px) {
+  .app {
+    padding: 24px 12px;
+  }
+
+  .card,
+  .analytics-card {
+    padding: 20px;
+  }
+
+  .analytics-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analytics-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .result-actions {
+    flex-direction: column;
+  }
 }
